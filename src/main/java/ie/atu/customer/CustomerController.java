@@ -44,8 +44,8 @@ public class CustomerController {
         return ResponseEntity.ok(customers);  // Returns 200 OK with list of customers
     }
 
-    @PutMapping("/{name}")
-    public ResponseEntity<?>updateCustomer(@PathVariable String name, @RequestBody @Valid Customer updatedCustomers, BindingResult result){
+    @PutMapping("/{email}")
+    public ResponseEntity<?>updateCustomer(@PathVariable String email, @RequestBody @Valid Customer updatedCustomer, BindingResult result){
         if (result.hasErrors()) {
             List<ErrorDetails>errors = new ArrayList<>();
             result.getFieldErrors().forEach(error -> {
@@ -56,20 +56,20 @@ public class CustomerController {
             return ResponseEntity.badRequest().body(errors);
         }
 
-        Customer updatedCustomer = myService.updateCustomer(name, updatedCustomers);
-        if (updatedCustomer == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee not found with Employee ID: " + name);
+        Customer updatedCustomerEntity = myService.updateCustomer(email, updatedCustomer);
+        if (updatedCustomerEntity == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found with email: " + email);
         }
-        return ResponseEntity.ok(updatedCustomer);
+        return ResponseEntity.ok(updatedCustomerEntity);
     }
 
-    @DeleteMapping("/{name}")
-    public ResponseEntity<?> deleteCustomer(@PathVariable String name){
+    @DeleteMapping("/{email}")
+    public ResponseEntity<?> deleteCustomer(@PathVariable String email){
         try {
-            myService.deleteCustomer(name);
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Employee deleted successfully");
+            myService.deleteCustomer(email);
+            return ResponseEntity.status(HttpStatus.NO_CONTENT).body("Customer account deleted successfully");
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Employee with Employee ID " + name + " not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer with email: " + email + " not found");
         }
     }
 

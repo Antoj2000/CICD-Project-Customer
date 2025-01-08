@@ -1,5 +1,6 @@
 package ie.atu.customer;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Optional;
 
 @Service
 public class CustomerService {
+
 
     private final CustomerRepository customerRepository;
 
@@ -24,9 +26,9 @@ public class CustomerService {
     }
 
     @Transactional
-    public Customer updateCustomer(String name, Customer updatedCustomer) {
+    public Customer updateCustomer(String email, Customer updatedCustomer) {
         // Check if the person with the given name exists
-        Optional<Customer> existingCustomerOptional = customerRepository.findById(updatedCustomer.getId());
+        Optional<Customer> existingCustomerOptional = customerRepository.findByEmail(email);
 
         if (existingCustomerOptional.isPresent()) {
             Customer existingCustomer = existingCustomerOptional.get();
@@ -41,24 +43,22 @@ public class CustomerService {
             // Save the updated person back to the database
             return customerRepository.save(existingCustomer);
         } else {
-            throw new IllegalArgumentException("Customer : " + name + " not found");
+            throw new IllegalArgumentException("Customer : " + email + " not found");
         }
     }
 
-    public void deleteCustomer(String name) {
-        // Find person by employeeId (assuming employeeId is unique)
+    public void deleteCustomer(String email) {
+        // Find person by email
         Optional<Customer> customerOptional = customerRepository.findAll().stream()
-                .filter(customer -> customer.getName().equals(name))
+                .filter(customer -> customer.getEmail().equals(email))
                 .findFirst();
 
         if (customerOptional.isPresent()) {
             // Delete the person
             customerRepository.delete(customerOptional.get());
         } else {
-            throw new IllegalArgumentException("Customer " + name + " not found");
+            throw new IllegalArgumentException("Customer " + email + " not found");
         }
     }
-
-
 
 }

@@ -17,6 +17,7 @@ public class Customer {
     private String name;
 
     @Email(message = "Invalid email address")
+    @NotBlank(message = "Email cannot be blank")
     private String email;
 
     @Min(value = 0, message = "Age must be greater than or equal to 0")
