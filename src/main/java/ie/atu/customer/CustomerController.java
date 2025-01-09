@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/customer")  //Base URL Mapping
@@ -44,23 +45,42 @@ public class CustomerController {
         return ResponseEntity.ok(customers);  // Returns 200 OK with list of customers
     }
 
-    @PutMapping("/{email}")
-    public ResponseEntity<?>updateCustomer(@PathVariable String email, @RequestBody @Valid Customer updatedCustomer, BindingResult result){
+    @GetMapping("/{email}")
+    public ResponseEntity<?> getCustomerByEmail(@PathVariable String email) {
+        // Attempt to get the product by its productId
+        Optional<Customer> customer = myService.getCustomerByEmail(email);
+
+        if (customer.isPresent()) {
+            // If the customer is found, return a response with customer details
+            return ResponseEntity.status(HttpStatus.OK).body(customer.get());
+        } else {
+            // If the customer is not found, return a 404 NOT FOUND response
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer with email " + email + " not found.");
+        }
+    }
+
+    @PutMapping("/balance/{email}")
+    // Endpoint to update customer's balance
+    public ResponseEntity<?> updateCustomerBalance(@PathVariable String email, @RequestBody @Valid Customer updatedCustomer, BindingResult result) {
         if (result.hasErrors()) {
-            List<ErrorDetails>errors = new ArrayList<>();
+            List<String> errors = new ArrayList<>();
             result.getFieldErrors().forEach(error -> {
-                String fieldName = error.getField();
                 String errorMessage = error.getDefaultMessage();
-                errors.add(new ErrorDetails(fieldName, errorMessage));
+                errors.add(errorMessage);
             });
             return ResponseEntity.badRequest().body(errors);
         }
 
-        Customer updatedCustomerEntity = myService.updateCustomer(email, updatedCustomer);
-        if (updatedCustomerEntity == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer not found with email: " + email);
+        try {
+            // Call the service method to update the customer's balance
+            Customer customer = myService.updateCustomerBalance(email, updatedCustomer);
+
+            // Return success response
+            return ResponseEntity.status(HttpStatus.OK).body("Balance updated successfully for customer: " + customer.getName());
+        } catch (Exception e) {
+            // Return error response if customer is not found or any other error occurs
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Customer with email " + email + " not found.");
         }
-        return ResponseEntity.ok(updatedCustomerEntity);
     }
 
     @DeleteMapping("/{email}")

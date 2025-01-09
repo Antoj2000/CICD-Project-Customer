@@ -25,7 +25,29 @@ public class CustomerService {
         return customerRepository.findAll();
     }
 
+    public Optional<Customer> getCustomerByEmail(String employeeId) {
+        // Find product by productId (returns Optional)
+        return customerRepository.findByEmail(employeeId);
+    }
+
     @Transactional
+    public Customer updateCustomerBalance(String email, Customer updatedCustomer) {
+        // Find customer by email
+        Optional<Customer> existingCustomerOptional = customerRepository.findByEmail(email);
+
+        if (existingCustomerOptional.isPresent()) {
+            Customer existingCustomer = existingCustomerOptional.get();
+            // Update the balance field with the new balance from the updatedCustomer object
+            existingCustomer.setBalance(updatedCustomer.getBalance());
+
+            // Save and return the updated customer
+            return customerRepository.save(existingCustomer);
+        } else {
+            throw new IllegalArgumentException("Customer with email " + email + " not found.");
+        }
+    }
+
+   /* @Transactional
     public Customer updateCustomer(String email, Customer updatedCustomer) {
         // Check if the person with the given name exists
         Optional<Customer> existingCustomerOptional = customerRepository.findByEmail(email);
@@ -45,7 +67,7 @@ public class CustomerService {
         } else {
             throw new IllegalArgumentException("Customer : " + email + " not found");
         }
-    }
+    }*/
 
     public void deleteCustomer(String email) {
         // Find person by email
